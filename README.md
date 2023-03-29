@@ -12,7 +12,7 @@ The **Amazon SQS Extended Client Library for PHP** enables you to manage Amazon 
 You can install this library using composer doing:
 
 ```
-composer require e0ipso/amazon-sqs-php-extended-client-lib
+composer require seriousjelly/amazon-sqs-php-extended
 ```
 
 ## Getting Started
