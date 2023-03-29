@@ -58,7 +58,9 @@ class SqsClient implements SqsClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function sendMessage($message, $queue_url = NULL) {
+  public function sendMessage(array $attributes, array $message, int $delay = 0, string | null $queue_url = NULL) {
+    $message = json_encode($message);
+
     switch ($this->config->getSendToS3()) {
       case ConfigInterface::ALWAYS:
         $use_sqs = FALSE;
@@ -76,25 +78,32 @@ class SqsClient implements SqsClientInterface {
         $use_sqs = TRUE;
         break;
     }
+
     $use_sqs = $use_sqs || !$this->config->getBucketName();
+
     if (!$use_sqs) {
       // First send the object to S3. The modify the message to store an S3
       // pointer to the message contents.
       $key = $this->generateUuid() . '.json';
+
       $receipt = $this->getS3Client()->upload(
         $this->config->getBucketName(),
         $key,
         $message
       );
+
       // Swap the message for a pointer to the actual message in S3.
       $message = (string) (new S3Pointer($this->config->getBucketName(), $key, $receipt));
+
     }
     $queue_url = $queue_url ?: $this->config->getSqsUrl();
-    return $this->getSqsClient()->sendMessage([
-      'QueueUrl' => $queue_url,
-      'MessageBody' => $message,
-    ]);
 
+    return $this->getSqsClient()->sendMessage([
+      'DelaySeconds' => 10,
+      'MessageAttributes' => $attributes,
+      'MessageBody' => $message,
+      'QueueUrl' => $queue_url,
+    ]);
   }
 
   /**

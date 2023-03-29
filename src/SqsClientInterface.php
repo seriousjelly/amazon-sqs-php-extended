@@ -19,15 +19,19 @@ interface SqsClientInterface {
    * If the message cannot fit SQS, it gets stored in S3 and a pointer is sent
    * to SQS.
    *
-   * @param $message
+   * * @param array $attributes
+   *   The message attributes to send.
+   * @param array $message
    *   The message to send.
+   * @param int $delay
+   *   Message delay
    * @param string $queue_url
    *   The SQS queue. Defaults to the one configured in the client.
    *
    * @return \Aws\ResultInterface
    *   The result of the transaction.
    */
-  public function sendMessage($message, $queue_url = NULL);
+  public function sendMessage(array $attributes, array $message, int $delay = 0, string | null $queue_url = NULL);
 
   /**
    * Gets a message from the queue.
